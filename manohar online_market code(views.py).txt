@@ -1,0 +1,47 @@
+from django.shortcuts import render, HttpResponseRedirect
+from .forms import ProductDetails
+from .models import User
+# Create your views here.
+
+# For showing data
+def add_show(request):
+    if request.method == 'POST':
+        fm = ProductDetails(request.POST)
+
+        if fm.is_valid():
+            pi = fm.cleaned_data['Prodid']
+            pn = fm.cleaned_data['Prodname']
+            pt1 = fm.cleaned_data['Prodtype1']
+            pr = fm.cleaned_data['Price']
+            pt2 = fm.cleaned_data['Prodtype2']
+            reg = User(Prodid=pi, Prodname=pn, Prodtype1=pt1, Price=pr, Prodtype2=pt2)
+            reg.save()
+            fm = ProductDetails()
+    else:
+        fm = ProductDetails()
+    prod = User.objects.all()
+    return render(request, 'flipcart/addandshow.html', {'form': fm,
+        'pro': prod})
+
+
+# For update data
+
+def update_data(request, Prodid):
+    if request.method == 'POST':
+        pi = User.objects.get(Prodid=Prodid)
+        fm = ProductDetails(request.POST, instance=pi)
+        if fm.is_valid():
+            fm.save()
+    else:
+        pi = User.objects.get(Prodid=Prodid)
+        fm = ProductDetails(instance=pi)
+    return render(request, 'flipcart/updateproduct.html', {'form': fm})
+
+# For delete
+
+def delete_data(request, Prodid):
+    if request.method == 'POST':
+        pi = User.objects.get(Prodid=Prodid)
+        # pi = User.objects.filter(Prodid=Prodid).first()
+        pi.delete()
+        return HttpResponseRedirect('/')
